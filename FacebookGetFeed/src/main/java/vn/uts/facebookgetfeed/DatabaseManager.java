@@ -1,14 +1,17 @@
 package vn.uts.facebookgetfeed;
 
 import org.springframework.data.mongodb.core.MongoOperations;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.social.facebook.api.StatusPost;
 
+import vn.uts.facebookgetfeed.dao.impl.PostDaoImpl;
+import vn.uts.facebookgetfeed.dao.impl.ProfileLogDaoImpl;
 import vn.uts.facebookgetfeed.domain.Post;
+import vn.uts.facebookgetfeed.domain.ProfileLog;
 
 public class DatabaseManager {
 
 	private static MongoOperations mongo;
+	private PostDaoImpl postDaoImpl = new PostDaoImpl();
+	private ProfileLogDaoImpl profileLogDaoImpl = new ProfileLogDaoImpl();
 
 	public static MongoOperations getMongoOperation() {
 		return mongo;
@@ -17,14 +20,24 @@ public class DatabaseManager {
 	public static void setMongoOperation(MongoOperations mongoOperation) {
 		mongo = mongoOperation;
 	}
-	
-	public static long foo() {
-		long res = mongo.count(new Query(), StatusPost.class);
-		return res;
+
+	public Post savePost(Post post) {
+		return postDaoImpl.save(post);
 	}
-	
-	public static boolean savePost(Post post) {
-		mongo.save(post);
-		return true;
+
+	public ProfileLog saveProfileLog(ProfileLog log) {
+		return profileLogDaoImpl.save(log);
+	}
+
+	public Post findPostByPostId(String postId) {
+		return postDaoImpl.findByPostId(postId);
+	}
+
+	public ProfileLog findProfileLogByProfileId(String profileId) {
+		return profileLogDaoImpl.findByProfileId(profileId);
+	}
+
+	public boolean existPostId(String postId) {
+		return findPostByPostId(postId) != null;
 	}
 }

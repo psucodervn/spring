@@ -2,8 +2,22 @@ package vn.uts.facebookgetfeed.domain;
 
 import java.util.Date;
 
+import org.springframework.data.annotation.Id;
+
+/**
+ * @author Hung
+ * 
+ */
 public class Post {
-	
+
+	/**
+	 * Primary key
+	 */
+	@Id
+	private String id;
+	/**
+	 * Id of post
+	 */
 	private String postId;
 	private String message;
 	private Date createdTime;
@@ -18,6 +32,9 @@ public class Post {
 		this.createdTime = createdTime;
 		this.updatedTime = updatedTime;
 		this.link = link;
+	}
+
+	public Post() {
 	}
 
 	public String getPostId() {

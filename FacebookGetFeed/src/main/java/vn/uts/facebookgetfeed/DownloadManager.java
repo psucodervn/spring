@@ -2,6 +2,9 @@ package vn.uts.facebookgetfeed;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.data.mongodb.core.MongoOperations;
@@ -14,10 +17,10 @@ public class DownloadManager {
 	private List<String> listAccessTokens;
 	private boolean isReady;
 
-	private int maxThreads;
+	private int maxThread;
 
 	private final String MONGO_TEMPLATE = "mongoTemplate";
-	private final String MAX_THREADS = "maxThreads";
+	private final String MAX_THREAD = "maxThread";
 
 	public DownloadManager(String configFileName) {
 		super();
@@ -30,14 +33,13 @@ public class DownloadManager {
 	private void init() {
 		listAccessTokens = new ArrayList<String>();
 		DatabaseManager.setMongoOperation(mongoOperation);
-		System.out.println(DatabaseManager.foo());
 	}
 
 	private boolean readConfig() {
 		try {
 			context = new GenericXmlApplicationContext(configFileName);
 			mongoOperation = (MongoOperations) context.getBean(MONGO_TEMPLATE);
-			maxThreads = (Integer) context.getBean(MAX_THREADS);
+			maxThread = (Integer) context.getBean(MAX_THREAD);
 			return true;
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
@@ -46,11 +48,15 @@ public class DownloadManager {
 	}
 
 	public int getMaxThreads() {
-		return maxThreads;
+		return maxThread;
 	}
 
 	public void setMaxThreads(int maxThreads) {
-		this.maxThreads = maxThreads;
+		this.maxThread = maxThreads;
+	}
+
+	public MongoOperations getMongoOperation() {
+		return mongoOperation;
 	}
 
 	public void addAccessToken(String accessToken) {
@@ -59,7 +65,32 @@ public class DownloadManager {
 		}
 	}
 
-	public void start() {
+	public void addAccessToken(String[] accessTokens) {
+		for (String accessToken : accessTokens) {
+			addAccessToken(accessToken);
+		}
+	}
 
+	public void startAndWait() {
+		final CountDownLatch latch = new CountDownLatch(listAccessTokens.size());
+		ExecutorService es = Executors.newFixedThreadPool(maxThread);
+
+		for (String accessToken : listAccessTokens) {
+			final FacebookManager fm = new FacebookManager(accessToken, latch);
+			es.submit(new Runnable() {				
+				@Override
+				public void run() {
+					fm.start();
+				}
+			});
+		}
+
+		try {
+			latch.await();
+			System.out.println("Wait done!");
+		} catch (InterruptedException e) {
+			System.out.println("Interrupted");
+		}
+		es.shutdown();
 	}
 }

@@ -5,31 +5,31 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
 import vn.uts.facebookgetfeed.DatabaseManager;
-import vn.uts.facebookgetfeed.dao.extend.PostDao;
-import vn.uts.facebookgetfeed.domain.Post;
+import vn.uts.facebookgetfeed.dao.extend.ProfileLogDao;
+import vn.uts.facebookgetfeed.domain.ProfileLog;
 
-public class PostDaoImpl implements PostDao {
+public class ProfileLogDaoImpl implements ProfileLogDao {
 
 	private MongoOperations mongo;
 
-	public PostDaoImpl() {
+	public ProfileLogDaoImpl() {
 		mongo = DatabaseManager.getMongoOperation();
 	}
 
 	@Override
-	public Post findOne(String id) {
+	public ProfileLog findOne(String id) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void delete(Post object) {
+	public void delete(ProfileLog object) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	public Post save(Post object) {
+	public ProfileLog save(ProfileLog object) {
 		mongo.save(object);
 		return object;
 	}
@@ -41,7 +41,7 @@ public class PostDaoImpl implements PostDao {
 	}
 
 	@Override
-	public Iterable<Post> findAll() {
+	public Iterable<ProfileLog> findAll() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -53,10 +53,10 @@ public class PostDaoImpl implements PostDao {
 	}
 
 	@Override
-	public Post findByPostId(String postId) {
+	public ProfileLog findByProfileId(String profileId) {
 		Query query = new Query();
-		query.addCriteria(Criteria.where("postId").is(postId));
-		return mongo.findOne(query, Post.class);
+		query.addCriteria(Criteria.where("profileId").is(profileId));
+		return mongo.findOne(query, ProfileLog.class);
 	}
 
 }

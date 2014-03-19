@@ -2,7 +2,6 @@ package com.example;
 
 import java.util.List;
 
-import org.apache.catalina.core.ApplicationContext;
 import org.springframework.context.support.GenericXmlApplicationContext;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.social.facebook.api.Facebook;
