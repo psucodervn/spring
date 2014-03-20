@@ -1,5 +1,6 @@
 package vn.uts.facebookgetfeed;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
@@ -113,8 +114,13 @@ public class FacebookManager {
 
 	private List<Post> getFeedBetween(long since, long until) {
 		PagingParameters pp = new PagingParameters(LIMIT, 0, since, until);
-		List<Post> posts = facebook.feedOperations().getHomeFeed(pp);
-		return posts;
+		try {
+			List<Post> posts = facebook.feedOperations().getHomeFeed(pp);
+			return posts;
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			return new ArrayList<Post>();
+		}
 	}
 
 	private void processPost(Post p) {
@@ -132,6 +138,8 @@ public class FacebookManager {
 	private void processLink(Post p) {
 		vn.uts.facebookgetfeed.domain.Post post = new vn.uts.facebookgetfeed.domain.Post();
 		post.setPostId(p.getId());
+		post.setFromId(p.getFrom().getId());
+		post.setFromName(p.getFrom().getName());
 		post.setMessage(p.getMessage());
 		post.setCreatedTime(p.getCreatedTime());
 		post.setUpdatedTime(p.getUpdatedTime());

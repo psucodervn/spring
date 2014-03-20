@@ -39,6 +39,7 @@ public class DownloadManager {
 		try {
 			context = new GenericXmlApplicationContext(configFileName);
 			mongoOperation = (MongoOperations) context.getBean(MONGO_TEMPLATE);
+			mongoOperation.getCollectionNames();
 			maxThread = (Integer) context.getBean(MAX_THREAD);
 			return true;
 		} catch (Exception e) {
@@ -66,18 +67,23 @@ public class DownloadManager {
 	}
 
 	public void addAccessToken(String[] accessTokens) {
+		if (!isReady)
+			return;
 		for (String accessToken : accessTokens) {
 			addAccessToken(accessToken);
 		}
 	}
 
 	public void startAndWait() {
+		if (!isReady)
+			return;
+
 		final CountDownLatch latch = new CountDownLatch(listAccessTokens.size());
 		ExecutorService es = Executors.newFixedThreadPool(maxThread);
 
 		for (String accessToken : listAccessTokens) {
 			final FacebookManager fm = new FacebookManager(accessToken, latch);
-			es.submit(new Runnable() {				
+			es.submit(new Runnable() {
 				@Override
 				public void run() {
 					fm.start();
@@ -92,5 +98,9 @@ public class DownloadManager {
 			System.out.println("Interrupted");
 		}
 		es.shutdown();
+	}
+
+	public boolean isReady() {
+		return isReady;
 	}
 }

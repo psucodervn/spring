@@ -19,6 +19,8 @@ public class Post {
 	 * Id of post
 	 */
 	private String postId;
+	private String fromId;
+	private String fromName;
 	private String message;
 	private Date createdTime;
 	private Date updatedTime;
@@ -75,5 +77,25 @@ public class Post {
 
 	public void setLink(String link) {
 		this.link = link;
+	}
+
+	public String getFromId() {
+		return fromId;
+	}
+
+	public void setFromId(String fromId) {
+		this.fromId = fromId;
+	}
+
+	public String getFromName() {
+		return fromName;
+	}
+
+	public void setFromName(String fromName) {
+		this.fromName = fromName;
+	}
+
+	public String getId() {
+		return id;
 	}
 }
