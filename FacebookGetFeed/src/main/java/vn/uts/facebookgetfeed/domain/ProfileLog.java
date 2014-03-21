@@ -1,15 +1,21 @@
 package vn.uts.facebookgetfeed.domain;
 
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 
 /**
  * @author Hung
- *
+ * 
+ * This collection was use to store the interval of time
+ * that program has already get feed in.
+ * The last interval of time is from lastSince to lastUntil, 
+ * so in next run the program will get feed in 
+ * (0 -> lastSince) and (lastUntil -> NOW)
  */
 public class ProfileLog {
 
 	@Id
-	private String id;
+	private ObjectId id;
 	private String profileId;
 	private long lastSince;
 	private long lastUntil;
@@ -36,5 +42,9 @@ public class ProfileLog {
 
 	public void setProfileId(String profileId) {
 		this.profileId = profileId;
+	}
+
+	public ObjectId getId() {
+		return id;
 	}
 }

@@ -9,11 +9,12 @@
           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
 	<mongo:mongo host="127.0.0.1" port="27017" />
-	
 	<mongo:db-factory dbname="facebook" />
-	<mongo:repositories base-package="com.test"></mongo:repositories>
-	<context:annotation-config></context:annotation-config>
-	<context:component-scan base-package="com.test"></context:component-scan>
+
+	<mongo:repositories base-package="vn.uts.facebookgetfeed.repository"></mongo:repositories>
+	<context:component-scan base-package="vn.uts.facebookgetfeed.service.*"></context:component-scan>
+	<context:component-scan base-package="vn.uts.facebookgetfeed"></context:component-scan>
+
 	<bean id="mappingContext"
 		class="org.springframework.data.mongodb.core.mapping.MongoMappingContext" />
 	<bean id="defaultMongoTypeMapper"
@@ -32,7 +33,8 @@
 		<constructor-arg name="mongoDbFactory" ref="mongoDbFactory" />
 		<constructor-arg name="mongoConverter" ref="mappingMongoConverter" />
 	</bean>
-	<bean id="maxThread" class="java.lang.Integer">
-		<constructor-arg value="10"></constructor-arg>
+	
+	<bean id="downloadManager" class="vn.uts.facebookgetfeed.DownloadManager">
+		<property name="maxThread" value="10"></property>
 	</bean>
 </beans>

@@ -6,25 +6,28 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import org.springframework.context.support.GenericXmlApplicationContext;
-import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import vn.uts.facebookgetfeed.service.PostService;
+import vn.uts.facebookgetfeed.service.ProfileLogService;
+
+@Component
 public class DownloadManager {
 
-	private String configFileName;
-	private GenericXmlApplicationContext context;
-	private MongoOperations mongoOperation;
+	@Autowired
+	private ProfileLogService profileLogService;
+
+	@Autowired
+	private PostService postService;
+
 	private List<String> listAccessTokens;
 	private boolean isReady;
 
 	private int maxThread;
 
-	private final String MONGO_TEMPLATE = "mongoTemplate";
-	private final String MAX_THREAD = "maxThread";
-
-	public DownloadManager(String configFileName) {
+	public DownloadManager() {
 		super();
-		this.configFileName = configFileName;
 		isReady = readConfig();
 		if (isReady)
 			init();
@@ -32,15 +35,10 @@ public class DownloadManager {
 
 	private void init() {
 		listAccessTokens = new ArrayList<String>();
-		DatabaseManager.setMongoOperation(mongoOperation);
 	}
 
 	private boolean readConfig() {
 		try {
-			context = new GenericXmlApplicationContext(configFileName);
-			mongoOperation = (MongoOperations) context.getBean(MONGO_TEMPLATE);
-			mongoOperation.getCollectionNames();
-			maxThread = (Integer) context.getBean(MAX_THREAD);
 			return true;
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
@@ -48,16 +46,12 @@ public class DownloadManager {
 		}
 	}
 
-	public int getMaxThreads() {
+	public int getMaxThread() {
 		return maxThread;
 	}
 
-	public void setMaxThreads(int maxThreads) {
-		this.maxThread = maxThreads;
-	}
-
-	public MongoOperations getMongoOperation() {
-		return mongoOperation;
+	public void setMaxThread(int maxThread) {
+		this.maxThread = maxThread;
 	}
 
 	public void addAccessToken(String accessToken) {
@@ -82,11 +76,12 @@ public class DownloadManager {
 		ExecutorService es = Executors.newFixedThreadPool(maxThread);
 
 		for (String accessToken : listAccessTokens) {
-			final FacebookManager fm = new FacebookManager(accessToken, latch);
+			final FacebookManager facebookManager = new FacebookManager(
+					accessToken, latch, postService, profileLogService);
 			es.submit(new Runnable() {
 				@Override
 				public void run() {
-					fm.start();
+					facebookManager.start();
 				}
 			});
 		}

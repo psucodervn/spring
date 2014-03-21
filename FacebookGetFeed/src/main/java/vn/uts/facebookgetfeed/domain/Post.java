@@ -2,11 +2,16 @@ package vn.uts.facebookgetfeed.domain;
 
 import java.util.Date;
 
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 
 /**
  * @author Hung
  * 
+ */
+/**
+ * @author Hung
+ *
  */
 public class Post {
 
@@ -14,30 +19,36 @@ public class Post {
 	 * Primary key
 	 */
 	@Id
-	private String id;
+	private ObjectId id;
+
 	/**
-	 * Id of post
+	 * Id of this post
 	 */
 	private String postId;
+
+	/**
+	 * Id of profile (user) whose accessToken is use to get feeds
+	 */
+	private String profileId;
+
+	/**
+	 * Id of profile (or page,...) that created this post
+	 */
 	private String fromId;
+
+	/**
+	 * Name of profile (or page,...) that created this post
+	 */
 	private String fromName;
 	private String message;
 	private Date createdTime;
 	private Date updatedTime;
 	private String link;
-
-	public Post(String postId, String message, Date createdTime,
-			Date updatedTime, String link) {
-		super();
-		this.postId = postId;
-		this.message = message;
-		this.createdTime = createdTime;
-		this.updatedTime = updatedTime;
-		this.link = link;
-	}
-
-	public Post() {
-	}
+	
+	/**
+	 * Type of the post, i.e STATUS, PHOTO, LINK,... 
+	 */
+	private String type;
 
 	public String getPostId() {
 		return postId;
@@ -95,7 +106,27 @@ public class Post {
 		this.fromName = fromName;
 	}
 
-	public String getId() {
+	public ObjectId getId() {
 		return id;
+	}
+
+	public void setId(ObjectId id) {
+		this.id = id;
+	}
+
+	public String getProfileId() {
+		return profileId;
+	}
+
+	public void setProfileId(String profileId) {
+		this.profileId = profileId;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 }
