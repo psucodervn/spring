@@ -9,10 +9,6 @@ import org.springframework.data.annotation.Id;
  * @author Hung
  * 
  */
-/**
- * @author Hung
- *
- */
 public class Post {
 
 	/**
@@ -44,9 +40,9 @@ public class Post {
 	private Date createdTime;
 	private Date updatedTime;
 	private String link;
-	
+
 	/**
-	 * Type of the post, i.e STATUS, PHOTO, LINK,... 
+	 * Type of the post, i.e STATUS, PHOTO, LINK,...
 	 */
 	private String type;
 

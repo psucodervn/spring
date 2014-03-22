@@ -17,7 +17,6 @@ public class PostServiceImpl implements PostService {
 		return postRepository.findByPostId(postId);
 	}
 
-	@Override
 	public Post save(Post post) {
 		return postRepository.save(post);
 	}

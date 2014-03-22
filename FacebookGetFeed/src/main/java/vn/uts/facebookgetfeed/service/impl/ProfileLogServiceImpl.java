@@ -18,7 +18,6 @@ public class ProfileLogServiceImpl implements ProfileLogService {
 		return profileLogRepository.findByProfileId(profileId);
 	}
 
-	@Override
 	public ProfileLog save(ProfileLog profileLog) {
 		return profileLogRepository.save(profileLog);
 	}

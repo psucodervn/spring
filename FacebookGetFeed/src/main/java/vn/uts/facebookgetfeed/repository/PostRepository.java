@@ -11,4 +11,5 @@ import vn.uts.facebookgetfeed.repository.extend.PostRepositoryExtend;
 public interface PostRepository extends MongoRepository<Post, ObjectId>,
 		PostRepositoryExtend {
 	public Post findByPostId(String postId);
+	
 }

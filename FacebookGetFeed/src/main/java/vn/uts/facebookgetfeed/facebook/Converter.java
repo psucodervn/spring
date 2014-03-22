@@ -1,4 +1,4 @@
-package vn.uts.facebookgetfeed;
+package vn.uts.facebookgetfeed.facebook;
 
 import java.util.Date;
 

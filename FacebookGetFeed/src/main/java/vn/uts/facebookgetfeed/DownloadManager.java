@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import vn.uts.facebookgetfeed.facebook.FacebookManager;
 import vn.uts.facebookgetfeed.service.PostService;
 import vn.uts.facebookgetfeed.service.ProfileLogService;
 
@@ -17,7 +18,6 @@ public class DownloadManager {
 
 	@Autowired
 	private ProfileLogService profileLogService;
-
 	@Autowired
 	private PostService postService;
 
