@@ -6,17 +6,16 @@ import org.springframework.data.annotation.Id;
 /**
  * @author Hung
  * 
- * This collection was use to store the interval of time
- * that program has already get feed in.
- * The last interval of time is from lastSince to lastUntil, 
- * so in next run the program will get feed in 
- * (0 -> lastSince) and (lastUntil -> NOW)
+ *         This collection was use to store the interval of time that program
+ *         has already get feed in. The last interval of time is from lastSince
+ *         to lastUntil, so in next run the program will get feed in (0 ->
+ *         lastSince) and (lastUntil -> NOW)
  */
-public class ProfileLog {
+public class UserLog {
 
 	@Id
 	private ObjectId id;
-	private String profileId;
+	private String userId;
 	private long lastSince;
 	private long lastUntil;
 
@@ -36,15 +35,15 @@ public class ProfileLog {
 		this.lastUntil = lastUntil;
 	}
 
-	public String getProfileId() {
-		return profileId;
-	}
-
-	public void setProfileId(String profileId) {
-		this.profileId = profileId;
-	}
-
 	public ObjectId getId() {
 		return id;
+	}
+
+	public String getUserId() {
+		return userId;
+	}
+
+	public void setUserId(String userId) {
+		this.userId = userId;
 	}
 }

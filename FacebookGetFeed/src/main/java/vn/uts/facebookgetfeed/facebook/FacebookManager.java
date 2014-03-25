@@ -9,39 +9,45 @@ import org.springframework.social.facebook.api.PagingParameters;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 
-import vn.uts.facebookgetfeed.domain.ProfileLog;
+import vn.uts.facebookgetfeed.domain.Action;
+import vn.uts.facebookgetfeed.domain.Post;
+import vn.uts.facebookgetfeed.domain.UserLog;
 import vn.uts.facebookgetfeed.map.MultivaluedHashMapString;
 import vn.uts.facebookgetfeed.object.FacebookPost;
+import vn.uts.facebookgetfeed.service.ActionService;
 import vn.uts.facebookgetfeed.service.PostService;
-import vn.uts.facebookgetfeed.service.ProfileLogService;
+import vn.uts.facebookgetfeed.service.UserLogService;
 
 @Component
 public class FacebookManager {
 
-	private ProfileLogService profileLogService;
+	private UserLogService userLogService;
 	private PostService postService;
+	private ActionService actionService;
 	private String accessToken;
 	private CountDownLatch latch;
 
-	private FacebookProfile me;
-	private ProfileLog log;
-	private FacebookOperations facebookOperations;
+	private UserLog log;
 	private MultiValueMap<String, String> queryParams;
+
+	private FacebookOperations facebookOperations;
+	private FacebookProfile me;
 
 	private final int LIMIT = 50;
 	private final long NOW = System.currentTimeMillis() / 1000;
 
 	public FacebookManager(String accessToken, CountDownLatch latch,
-			PostService postService, ProfileLogService profileLogService) {
+			PostService postService, UserLogService profileLogService, ActionService actionService) {
 		super();
 		this.postService = postService;
-		this.profileLogService = profileLogService;
-		setAccessToken(accessToken);
+		this.userLogService = profileLogService;
+		this.actionService = actionService;
+		facebookOperations = new FacebookOperations(accessToken);
+		me = facebookOperations.getMe();
 		setLatch(latch);
 	}
 
 	public FacebookManager() {
-		super();
 	}
 
 	public FacebookProfile getMe() {
@@ -52,28 +58,23 @@ public class FacebookManager {
 		return accessToken;
 	}
 
-	public void setAccessToken(String accessToken) {
-		facebookOperations = new FacebookOperations(accessToken);
-		me = facebookOperations.getMe();
-	}
-
 	public void start() {
 		if (me != null) {
-			doWork();
+			startGetFeed();
 			done();
 		}
 		latch.countDown();
 	}
 
-	private void doWork() {
+	private void startGetFeed() {
 		System.out.println("Started [profileId=" + me.getId() + "]");
 		queryParams = new MultivaluedHashMapString();
 		queryParams.add("limit", Integer.toString(LIMIT));
 		queryParams.add("fields", FacebookPost.FIELDS);
-		log = profileLogService.findByProfileId(me.getId());
+		log = userLogService.findByProfileId(me.getId());
 		if (log == null) {
-			log = new ProfileLog();
-			log.setProfileId(me.getId());
+			log = new UserLog();
+			log.setUserId(me.getId());
 			log.setLastSince(NOW);
 			log.setLastUntil(NOW);
 			getFeedBefore();
@@ -95,7 +96,7 @@ public class FacebookManager {
 						Converter.dateToTimeStamp(p.getCreated_time()));
 			}
 			log.setLastUntil(since);
-			profileLogService.save(log);
+			userLogService.save(log);
 			if (posts.isEmpty() && until >= NOW)
 				break;
 		} while (true);
@@ -114,13 +115,15 @@ public class FacebookManager {
 						Converter.dateToTimeStamp(p.getCreated_time()));
 			}
 			log.setLastSince(until);
-			profileLogService.save(log);
+			userLogService.save(log);
 		} while (true);
 	}
 
 	private List<FacebookPost> getFeedBetween(long since, long until) {
 		PagingParameters pp = new PagingParameters(LIMIT, 0, since, until);
 		try {
+			queryParams.set("since", Long.toString(since));
+			queryParams.set("until", Long.toString(until));
 			List<FacebookPost> posts = facebookOperations.getHomeFeed(pp,
 					queryParams);
 			return posts;
@@ -131,31 +134,34 @@ public class FacebookManager {
 	}
 
 	private void processPost(FacebookPost p) {
-		switch (p.getType()) {
-		case LINK:
+		if (p.getType().equals("link")) {
 			processLink(p);
-			break;
-		default:
-			if (p.getLink() != null)
+		} else {
+			if (p.getLink() != null) {
 				processLink(p);
-			break;
+			}
 		}
 	}
 
 	private void processLink(FacebookPost p) {
 		try {
-			vn.uts.facebookgetfeed.domain.Post post = new vn.uts.facebookgetfeed.domain.Post();
+			Post post = postService.findByPostId(p.getId());
+			if (post != null)
+				return;
+
+			post = new Post();
 			post.setPostId(p.getId());
-			post.setProfileId(me.getId());
-//			post.setFromId(p.getFrom().getId());
-//			post.setFromName(p.getFrom().getName());
+			post.setFromId(p.getFrom().getId());
 			post.setMessage(p.getMessage());
+			post.setCaption(p.getCaption());
 			post.setCreatedTime(p.getCreated_time());
-//			post.setUpdatedTime(p.getUpdatedTime());
 			post.setLink(p.getLink());
-			post.setType(p.getType().name());
-			if (postService.findByPostId(post.getPostId()) == null)
-				postService.save(post);
+			post.setType(p.getType());
+			postService.save(post);
+			
+			Action action = facebookOperations.getAction(post.getPostId());
+			action.setPostObjectId(post.getId());
+			actionService.save(action);
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}

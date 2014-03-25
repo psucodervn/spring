@@ -10,16 +10,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import vn.uts.facebookgetfeed.facebook.FacebookManager;
+import vn.uts.facebookgetfeed.service.ActionService;
 import vn.uts.facebookgetfeed.service.PostService;
-import vn.uts.facebookgetfeed.service.ProfileLogService;
+import vn.uts.facebookgetfeed.service.UserLogService;
 
 @Component
 public class DownloadManager {
 
 	@Autowired
-	private ProfileLogService profileLogService;
+	private UserLogService profileLogService;
 	@Autowired
 	private PostService postService;
+	@Autowired
+	private ActionService actionService;
 
 	private List<String> listAccessTokens;
 	private boolean isReady;
@@ -72,12 +75,12 @@ public class DownloadManager {
 		if (!isReady)
 			return;
 
-		final CountDownLatch latch = new CountDownLatch(listAccessTokens.size());
+		final CountDownLatch latch = new CountDownLatch(listAccessTokens.size() * 1);
 		ExecutorService es = Executors.newFixedThreadPool(maxThread);
 
 		for (String accessToken : listAccessTokens) {
 			final FacebookManager facebookManager = new FacebookManager(
-					accessToken, latch, postService, profileLogService);
+					accessToken, latch, postService, profileLogService, actionService);
 			es.submit(new Runnable() {
 				@Override
 				public void run() {

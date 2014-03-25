@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.springframework.social.facebook.api.Facebook;
 import org.springframework.social.facebook.api.FacebookProfile;
+import org.springframework.social.facebook.api.FqlResult;
+import org.springframework.social.facebook.api.FqlResultMapper;
 import org.springframework.social.facebook.api.PagedList;
 import org.springframework.social.facebook.api.PagingParameters;
 import org.springframework.social.facebook.api.Post;
@@ -15,7 +17,8 @@ import org.springframework.social.facebook.api.impl.json.FacebookModule;
 import org.springframework.social.support.URIBuilder;
 import org.springframework.util.MultiValueMap;
 
-import vn.uts.facebookgetfeed.map.MultivaluedHashMapString;
+import vn.uts.facebookgetfeed.domain.Action;
+import vn.uts.facebookgetfeed.object.ActionCount;
 import vn.uts.facebookgetfeed.object.FacebookPost;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -63,6 +66,61 @@ public class FacebookOperations {
 			MultiValueMap<String, String> queryParams) {
 		return facebook.fetchConnections("me", "home", FacebookPost.class,
 				queryParams);
+	}
+
+	public ActionCount getActionCount(String postId) {
+		ActionCount count = facebook
+				.fqlOperations()
+				.query("SELECT like_info.like_count, "
+						+ "comment_info.comment_count, share_count "
+						+ "FROM stream WHERE post_id = \"" + postId + "\"",
+						new ActionCount.ActionCountMapper()).get(0);
+		return count;
+	}
+
+	public Action getAction(String postId) {
+		Action action = new Action();
+//		ActionCount count = getActionCount(postId);
+//		action.setLikeCount(count.getLikeCount());
+//		action.setCommentCount(count.getCommentCount());
+//		action.setShareCount(count.getShareCount());
+//		action.setFriendLikeIdList(getFriendLikeIdList(postId));
+//		action.setFriendCommentIdList(getFriendCommentIdList(postId));
+		action.setPostId(postId);
+		return action;
+	}
+
+	public List<String> getFriendLikeIdList(String postId) {
+		List<String> ids = new ArrayList<String>();
+		ids = facebook.fqlOperations().query(
+				"SELECT user_id FROM like WHERE (post_id = \"" + postId
+						+ "\" AND user_id IN (SELECT uid1, uid2 FROM "
+						+ "friend WHERE uid1 = me() OR uid2 = me()))",
+				new FqlResultMapper<String>() {
+					@Override
+					public String mapObject(FqlResult objectValues) {
+						return objectValues.getString("user_id");
+					}
+				});
+		return ids;
+	}
+
+	public List<String> getFriendCommentIdList(String postId) {
+		List<String> ids = new ArrayList<String>();
+		ids = facebook
+				.fqlOperations()
+				.query("SELECT uid FROM user WHERE uid IN "
+						+ "(SELECT fromid FROM comment WHERE (post_id = \""
+						+ postId
+						+ "\" AND fromid IN "
+						+ "(SELECT uid1, uid2 FROM friend WHERE uid1 = me() OR uid2 = me())))",
+						new FqlResultMapper<String>() {
+							@Override
+							public String mapObject(FqlResult objectValues) {
+								return objectValues.getString("uid");
+							}
+						});
+		return ids;
 	}
 
 	@SuppressWarnings("unused")

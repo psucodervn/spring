@@ -1,17 +1,17 @@
 package vn.uts.facebookgetfeed.object;
 
 import java.util.Date;
-import java.util.LinkedHashMap;
 
 public class FacebookPost {
 
 	private String id;
 	private String message;
+	private String caption;
 	private String link;
 	private Date created_time;
-	private PostType type;
-	private LinkedHashMap<String,Object> from;
-	private String fromId;
+//	private PostType type;
+	private String type;
+	private FacebookFrom from;
 
 	public String getId() {
 		return id;
@@ -45,32 +45,29 @@ public class FacebookPost {
 		this.created_time = created_time;
 	}
 
-	public PostType getType() {
-		return type;
-	}
-
-	public void setType(PostType type) {
-		this.type = type;
-	}
-	
-	public static final String FIELDS = "id,message,link,created_time,from.fields(id)"; 
-	public static enum PostType { POST, CHECKIN, LINK, NOTE, PHOTO, STATUS, VIDEO, SWF, MUSIC }
-	
-	public Object getFrom() {
+	public FacebookFrom getFrom() {
 		return from;
 	}
 
-	public void setFrom(LinkedHashMap<String, Object> from) {
+	public void setFrom(FacebookFrom from) {
 		this.from = from;
-		fromId = from.get("id").toString();
 	}
 
-	public String getFromId() {
-		return fromId;
+	public static final String FIELDS = "id,message,link,created_time,type,caption,from.fields(id)";
+
+	public String getCaption() {
+		return caption;
 	}
 
-	public void setFromId(String fromId) {
-		this.fromId = fromId;
-		from.put("id", fromId);
+	public void setCaption(String caption) {
+		this.caption = caption;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
 	}
 }
